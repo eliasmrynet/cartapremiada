@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Carta Premiada Mr(Y)Net — Totem Ready</title>
+<style>
+  :root{
+    /* Paleta */
+    --brand-prim:#016d31; --brand-prim-2:#026f32; --brand-text:#f4faff; --muted:#cfe8d7;
+    --bg:#071a10; --lose:#ff5470; --win:var(--brand-prim);
+
+    /* Fallback da logo (sempre existe) */
+    --logo-url: url("data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop stop-color='%23016d31'/><stop offset='1' stop-color='%23026f32'/></linearGradient></defs><rect width='256' height='256' rx='36' fill='%230e2a1a'/><g transform='translate(28 28)'><circle cx='100' cy='100' r='84' fill='url(%23g)'/><path d='M46 108l28 28 64-64' fill='none' stroke='%23fff' stroke-width='16' stroke-linecap='round' stroke-linejoin='round'/></g></svg>");
+
+    /* Escalas fluidas */
+    --space: clamp(8px, 1.2vw, 16px);
+    --radius: clamp(12px, 1.4vw, 18px);
+    --fs-xxs: clamp(10px, 1.6vw, 12px);
+    --fs-sm:  clamp(14px, 2.2vw, 16px);
+    --fs-md:  clamp(16px, 2.6vw, 18px);
+    --fs-xl:  clamp(22px, 3.8vw, 28px);
+  }
+
+  *{ box-sizing:border-box }
+  html,body{ height:100% }
+  body{
+    margin:0; color:var(--brand-text);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial,sans-serif;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, rgba(1,109,49,.25) 0%, transparent 55%),
+      conic-gradient(from -14deg at 50% 40%,
+                     rgba(1,109,49,.08) 0 8%, transparent 8% 16%,
+                     rgba(1,109,49,.08) 16% 24%, transparent 24% 32%,
+                     rgba(1,109,49,.08) 32% 40%, transparent 40% 48%,
+                     rgba(1,109,49,.08) 48% 56%, transparent 56% 64%,
+                     rgba(1,109,49,.08) 64% 72%, transparent 72% 80%,
+                     rgba(1,109,49,.08) 80% 88%, transparent 88% 96%,
+                     rgba(1,109,49,.08) 96% 100%),
+      var(--bg);
+    display:flex; align-items:center; justify-content:center; padding:var(--space);
+    -webkit-user-select:none; user-select:none; touch-action:manipulation;
+  }
+
+  .app{ width:min(1200px,98vw) }
+  header{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:var(--space); margin-bottom:calc(var(--space)*1.2) }
+  .brand{ display:flex; gap:calc(var(--space)*.8); align-items:center }
+  .logo{
+    width:clamp(42px,5vw,56px); height:clamp(42px,5vw,56px);
+    display:grid; place-items:center; border-radius:14px;
+    background:linear-gradient(135deg,var(--brand-prim),var(--brand-prim-2));
+    box-shadow:0 8px 28px rgba(0,0,0,.35);
+  }
+  .brand h1{ margin:0; font-size:var(--fs-xl) }
+  .brand small{ display:block; color:var(--muted); font-size:var(--fs-xxs); margin-top:2px }
+  .actions{ display:flex; gap:clamp(8px,1.2vw,14px); align-items:center }
+  button{
+    cursor:pointer; border:0; color:var(--brand-text); font-weight:700;
+    padding:clamp(12px,1.6vw,16px) clamp(16px,2vw,20px);
+    border-radius:var(--radius);
+    background:linear-gradient(180deg,#113420,#0b2a1a);
+    box-shadow:0 6px 20px rgba(0,0,0,.25);
+    font-size:var(--fs-sm);
+    transition:transform .2s, background .2s; min-height:56px;
+  }
+  button:hover{ transform:translateY(-1px); background:#134626 }
+  .shuffle-hint{ color:var(--muted); font-size:var(--fs-xxs) }
+
+  /* GRID RESPONSIVO */
+  .grid{
+    display:grid; gap:clamp(10px,1.6vw,18px);
+    grid-template-columns:repeat(auto-fit, minmax(clamp(120px,22vw,240px),1fr));
+  }
+
+  /* Cartas */
+  .card{ position:relative; width:100%; aspect-ratio:2/3; perspective:1000px }
+  .card button{ width:100%; height:100%; padding:0; background:transparent; border-radius:clamp(14px,2vw,20px) }
+  .inner{
+    position:absolute; inset:0; border-radius:inherit; transform-style:preserve-3d;
+    transition: transform .48s cubic-bezier(.2,.7,.2,1);
+    will-change: transform; transform: translateZ(0);
+  }
+  .card.flipped .inner{ transform: rotateY(180deg) }
+  .face{ position:absolute; inset:0; display:grid; place-items:center; border-radius:inherit; backface-visibility:hidden; overflow:hidden; border:1px solid rgba(255,255,255,.08) }
+
+  .front{ background:linear-gradient(160deg,#0e2a1a,#0a1e13 70%); box-shadow:inset 0 0 40px rgba(0,0,0,.35) }
+  .front::after{
+    content:""; position:absolute; inset:0;
+    background:var(--logo-url) no-repeat center/68%;
+    opacity:.14; pointer-events:none
+  }
+  .front span{
+    font-weight:800; letter-spacing:.08em; text-transform:uppercase; font-size:var(--fs-xxs);
+    background:linear-gradient(90deg,#dbffea,#ffffff); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+
+  .back{ transform:rotateY(180deg); background:linear-gradient(135deg,#123b24,#0b1a10);
+    padding:clamp(10px,1.2vw,16px); text-align:center; display:grid; place-items:center; gap:clamp(6px,1vw,10px) }
+  .badge{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#0e291a }
+  .badge .dot{ width:10px; height:10px; border-radius:50% }
+  .badge.win .dot{ background:var(--win) } .badge.lose .dot{ background:var(--lose) }
+  .back h3{ margin:8px 0 2px; font-size:var(--fs-md) }
+  .back p{ margin:0; color:var(--muted); font-size:var(--fs-xxs) }
+
+  /* Imagem do prêmio no card e no modal (não deforma) */
+  .prize-img{
+    max-width:80%;
+    max-height:60%;
+    border-radius:8px;
+    object-fit:contain;
+    display:block;
+    margin:2px auto 8px;
+    image-rendering:auto;
+  }
+
+  /* Toast & Modal */
+  .toast{ position:fixed; inset:auto 0 clamp(12px,2vw,22px) 0; display:flex; justify-content:center; pointer-events:none }
+  .toast > div{ background:linear-gradient(135deg,#0f2a1c,#0a1f15); padding:12px 16px; border-radius:var(--radius); box-shadow:0 10px 30px rgba(0,0,0,.35); pointer-events:auto; font-size:var(--fs-sm) }
+  .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(5,8,20,.6); z-index:10 }
+  .modal.open{ display:flex }
+  .modal-card{ width:min(560px,92vw); border-radius:var(--radius); background:linear-gradient(135deg,#102e1d,#0c2217); padding:clamp(16px,2vw,22px); box-shadow:0 16px 40px rgba(0,0,0,.45) }
+  .modal-card h2{ margin:0 0 8px; font-size:var(--fs-xl) }
+  .modal-card p{ margin:0 0 14px; color:var(--muted); font-size:var(--fs-sm) }
+
+  /* Confete acima do modal */
+  .confetti{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:9999 }
+  .confetti i{ position:absolute; border-radius:2px; opacity:0; animation: fall 1100ms linear forwards; will-change:transform,opacity; transform: translate3d(0,-20vh,0) rotate(0deg) }
+  @keyframes fall{ 0%{ transform:translateY(-20vh) rotate(0) } 100%{ transform:translateY(110vh) rotate(540deg); opacity:1 } }
+
+  /* Embaralhar leve */
+  @keyframes shuffle-tilt { 0%{ transform:translate3d(0,0,0) rotateZ(0) } 40%{ transform:translate3d(0,-6px,0) rotateZ(var(--rz,6deg)) } 100%{ transform:translate3d(0,0,0) rotateZ(0) } }
+  .grid.shuffling .card .inner{ animation: shuffle-tilt 480ms ease both; animation-delay: calc(var(--i,0)*28ms) }
+
+  @media (max-height:720px) and (orientation:landscape){ .brand small{ display:none } }
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Jogo Carta Premiada">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">🎴</div>
+        <div>
+          <h1>Carta Premiada Mr(Y)Net</h1>
+          <small>Toque numa carta. Embaralhe para nova rodada.</small>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnNovaRodada" title="Embaralhar agora">🔄 Embaralhar</button>
+        <span class="shuffle-hint" aria-hidden="true">as cartas mudam ao Embaralhar</span>
+      </div>
+    </header>
+
+    <main class="grid" id="grid" aria-live="polite"></main>
+  </div>
+
+  <div class="toast" id="toast" hidden><div id="toastMsg">Vamos lá! Escolha sua carta 👇</div></div>
+
+  <div class="modal" id="modal">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="md-title">
+      <div id="modalWelcome">
+        <h2 id="md-title">Vamos lá! 🎉</h2>
+        <p>São 12 cartas, 4 com brinde (1 duplicado) e 8 sem sorte. Boa sorte!</p>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
+          <button id="btnFecharModal">Vamos jogar</button>
+        </div>
+      </div>
+      <div id="modalWin" hidden>
+        <div style="display:grid;place-items:center;gap:10px;text-align:center">
+          <h2>🎉 Você ganhou!</h2>
+          <img id="winImg" class="prize-img" alt="" hidden>
+          <h3 id="winTitle"></h3>
+          <p id="winDesc" style="color:var(--muted)"></p>
+          <div style="display:flex;gap:10px;justify-content:center;margin-top:4px">
+            <button id="btnOkWin">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <script>
+  "use strict";
+
+  // ===== Prêmios =====
+  const PRIZE_POOL = [
+    {key:'bone',  label:'Boné',            desc:'Retire no estande! 🧢 '},
+    {key:'refri', label:'Refrigerante',    desc:'Aproveite seu refri! 🥤 '},
+    {key:'chopp', label:'1 copo de chopp', desc:'Aproveite seu Chopp! 🍺'},
+    {key:'aperto',label:'1 aperto de mão', desc:'Com direito a foto 😄'},
+    {key:'lanche',label:'1 lanche',        desc:'Aproveite! 😋 '}
+  ];
+  const LOSE_TEXT='Sem sorte', TOTAL_CARDS=12, PRIZE_SLOTS=4, LOSERS_COUNT=TOTAL_CARDS-PRIZE_SLOTS;
+
+  // ===== Elementos =====
+  const grid=document.getElementById('grid');
+  const toast=document.getElementById('toast'), toastMsg=document.getElementById('toastMsg');
+  const modal=document.getElementById('modal'), modalWelcome=document.getElementById('modalWelcome'), modalWin=document.getElementById('modalWin');
+  const btnNova=document.getElementById('btnNovaRodada'), btnFecharModal=document.getElementById('btnFecharModal'), btnOkWin=document.getElementById('btnOkWin');
+  const winTitle=document.getElementById('winTitle'), winDesc=document.getElementById('winDesc'), winImg=document.getElementById('winImg');
+  const confetti=document.getElementById('confetti');
+
+  let locked=false, deck=[]; let idleT, roundEndT;
+
+  // ===== Áudio (defensivo) =====
+  let ctx;
+  try{
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    ctx=new AudioCtx();
+  }catch(e){ ctx=null; }
+  function tone(f=440,d=0.12,t='sine',v=0.15){
+    if(!ctx) return;
+    try{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.type=t; o.frequency.value=f; g.gain.value=v;
+      o.connect(g); g.connect(ctx.destination); o.start();
+      setTimeout(()=>{ try{ g.gain.exponentialRampToValueAtTime(0.00001,ctx.currentTime+d); o.stop(ctx.currentTime+d); }catch(_){} }, d*1000);
+    }catch(_){}
+  }
+  const sFlip=()=>tone(520,.09,'triangle',.12), sWinA=()=>tone(880,.12,'sine',.18), sWinB=()=>tone(1175,.14,'square',.14), sLose=()=>tone(220,.16,'sawtooth',.12), sPop=()=>tone(740,.07,'triangle',.10);
+  const sShuffle=()=>{[400,460,520,580,640].forEach((f,i)=>setTimeout(()=>tone(f,.06,'triangle',.06),i*40));};
+
+  // ===== Toast =====
+  function showToast(msg,ms=1600){ toastMsg.textContent=msg; toast.hidden=false; sPop(); clearTimeout(showToast._t); showToast._t=setTimeout(()=>toast.hidden=true,ms); }
+
+  // ===== Modal =====
+  function openWelcome(){ modal.classList.add('open'); modalWelcome.hidden=false; modalWin.hidden=true; }
+  function closeModal(){ modal.classList.remove('open'); }
+  btnFecharModal?.addEventListener('pointerup',()=>{ closeModal(); showToast('Vamos lá! Escolha sua carta 👇',2000); },{passive:true});
+  btnOkWin?.addEventListener('pointerup',()=>{ closeModal(); },{passive:true});
+
+  // ===== Kiosk helpers =====
+  function goFullscreen(){ try{ const el=document.documentElement; el.requestFullscreen && el.requestFullscreen(); }catch(_){} }
+  let wakeLock;
+  async function keepAwake(){ try{ wakeLock=await navigator.wakeLock.request('screen'); }catch(_){} }
+  window.addEventListener('contextmenu',e=>e.preventDefault());
+  window.addEventListener('pointerdown',function once(){ try{ ctx && ctx.resume && ctx.resume(); }catch(_){} goFullscreen(); keepAwake(); window.removeEventListener('pointerdown',once,true); },true);
+
+  // ===== Mapa de imagens AVIF (na raiz) e helper =====
+  const PRIZE_IMG_MAP = {
+    bone:'bone.avif',
+    refri:'refrigerante.avif',
+    chopp:'chopp.avif',
+    aperto:'handshake.avif',
+    lanche:'lanche.avif'
+  };
+  const getPrizeImg = (key) => PRIZE_IMG_MAP[key] || null;
+
+  // ===== Inatividade global (kiosk): agora 60s =====
+  function armIdleReset(){
+    clearTimeout(idleT);
+    idleT = setTimeout(()=>{ modal.classList.remove('open'); startRound(true); }, 60_000);
+  }
+  ['pointerdown','pointerup'].forEach(ev=>window.addEventListener(ev,armIdleReset,{passive:true}));
+
+  // ===== Utils =====
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  function buildPrizeCards(){
+    const handshake=PRIZE_POOL.find(p=>p.key==='aperto');
+    const remaining=PRIZE_POOL.filter(p=>p.key!=='aperto');
+    const twoOthers=shuffle([...remaining]).slice(0,2);
+    const prizes=[handshake,{...handshake},...twoOthers].map(p=>({...p,type:'prize'}));
+    return shuffle(prizes).slice(0,PRIZE_SLOTS);
+  }
+  function buildDeck(){ const losers=Array.from({length:LOSERS_COUNT},()=>({type:'lose'})); const picks=buildPrizeCards(); return shuffle([...losers,...picks]); }
+
+  // ===== Render =====
+  function mkCardHTML(item,idx){
+    const isLose=item.type==='lose';
+    const badgeClass=isLose?'badge lose':'badge win';
+    const badgeText=isLose?'☹️ Sem Sorte':'🎁 Prêmio';
+    const hint=isLose?'Não foi dessa vez.':'Parabéns! Você ganhou!';
+    const rz=(idx%2?-6:6)+'deg';
+
+    const img = (!isLose && getPrizeImg(item.key))
+      ? `<img class="prize-img" src="${getPrizeImg(item.key)}" alt="${item.label}" loading="eager" decoding="async" onerror="this.remove()">`
+      : '';
+
+    return `
+      <div class="card" data-idx="${idx}" style="--i:${idx};--rz:${rz}">
+        <button aria-label="Carta ${idx+1}. ${isLose?'Sem sorte':'Com prêmio'}">
+          <div class="inner">
+            <div class="face front"><span>CARTA PREMIADA</span></div>
+            <div class="face back">
+              <span class="${badgeClass}"><i class="dot"></i>${badgeText}</span>
+              ${img}
+              <h3>${isLose?LOSE_TEXT:item.label}</h3>
+              <p>${isLose?hint:(item.desc||'')}</p>
+            </div>
+          </div>
+        </button>
+      </div>`;
+  }
+  function render(){
+    grid.innerHTML=deck.map(mkCardHTML).join('');
+    grid.querySelectorAll('.card').forEach(card=>{
+      card.querySelector('button').addEventListener('pointerup',()=>onPick(card),{passive:true});
+    });
+  }
+
+  // ===== Embaralhar (anima leve) =====
+  function animateShuffle(cb){ grid.classList.add('shuffling'); sShuffle(); setTimeout(()=>{ cb&&cb(); grid.classList.remove('shuffling'); },520); }
+
+  // ===== Confete (em lotes) =====
+  function burstConfetti(total=60){
+    const colors=['#016d31','#026f32','#017230','#ffffff','#9be7b3']; const batch=12; let created=0;
+    function spawn(){ const end=Math.min(created+batch,total);
+      for(let i=created;i<end;i++){
+        const el=document.createElement('i');
+        el.style.left=(Math.random()*100)+'vw'; el.style.top='-10vh';
+        el.style.background=colors[Math.floor(Math.random()*colors.length)];
+        el.style.width=(6+Math.random()*9)+'px'; el.style.height=(9+Math.random()*14)+'px'; el.style.opacity=0.95;
+        const dur=850+Math.random()*700; el.style.animationDuration=dur+'ms';
+        el.style.willChange='transform,opacity';
+        confetti.appendChild(el); setTimeout(()=>el.remove(),dur+400);
+      }
+      created=end; if(created<total) requestAnimationFrame(spawn);
+    }
+    requestAnimationFrame(spawn);
+  }
+
+  // ===== Jogo =====
+  function onPick(card){
+    if(locked) return;
+    locked=true;
+    clearTimeout(roundEndT);
+    sFlip();
+    card.classList.add('flipped');
+    const idx=+card.dataset.idx; const item=deck[idx];
+    setTimeout(()=>{
+      if(item.type==='prize'){
+        sWinA(); setTimeout(sWinB,120);
+        showWinModal(item);
+        showToast(`🎉 Parabéns! Você ganhou: ${item.label}!`,2000);
+        // Não embaralha imediatamente. Dá 60s pro usuário usar o botão; depois embaralha automático.
+        roundEndT = setTimeout(()=>startRound(true), 60_000);
+      } else {
+        sLose();
+        showToast('☹️ Sem sorte… toque em Embaralhar ou aguarde 60s.',4000);
+        // Também espera 60s antes de auto-embaralhar.
+        roundEndT = setTimeout(()=>startRound(true), 60_000);
+      }
+    },360);
+  }
+
+  function startRound(manual=false){
+    clearTimeout(roundEndT);
+    const build=()=>{ deck=buildDeck(); render(); locked=false; if(manual) showToast('Nova rodada embaralhada!',1000); };
+    if(manual) animateShuffle(build); else build();
+  }
+
+  function showWinModal(item){
+    winTitle.textContent=item.label;
+    winDesc.textContent=item.desc||'';
+
+    const src = getPrizeImg(item.key);
+    if(src){
+      winImg.src = src;
+      winImg.hidden = false;
+      winImg.onerror = ()=>{ winImg.hidden=true; };
+    }else{
+      winImg.hidden = true;
+      winImg.removeAttribute('src');
+    }
+
+    modal.classList.add('open'); modalWelcome.hidden=true; modalWin.hidden=false;
+    requestAnimationFrame(()=>burstConfetti(60));
+  }
+
+  // ===== Botão Embaralhar =====
+  btnNova.addEventListener('pointerup',()=>{ clearTimeout(roundEndT); startRound(true); },{passive:true});
+
+  // ===== Init / Inatividade =====
+  (function init(){ openWelcome(); startRound(); armIdleReset(); })();
+
+  // ===== Logo do cliente (arquivo local, cache-busting) =====
+  (function applyClientLogo(){
+    const CANDIDATES = ["logo.png","Y.png","logo.webp","logo.jpg","logo.jpeg"];
+    let applied = false;
+    for(const src of CANDIDATES){
+      const img=new Image();
+      img.onload=()=>{ if(applied) return; applied=true; document.documentElement.style.setProperty('--logo-url', `url("${src}?v=${Date.now()}")`); };
+      img.onerror=()=>{};
+      img.src=src+"?v="+Date.now();
+    }
+  })();
+  </script>
+</body>
+</html>
